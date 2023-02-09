@@ -1,0 +1,6 @@
+apiVersion: v1
+kind: Namespace
+metadata: 
+  name: testing-env #name should be small letters
+  labels:
+    teamname: testing-team #name should be small letters

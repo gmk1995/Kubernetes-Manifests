@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongodb-statefulset
+  namespace: testing-env
+spec:
+  selector:
+    matchLabels:
+      app: mongodb
+  serviceName: mongodb-service
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: mongodb-container
+        image: mongo
+        command:
+          - "mongod"
+          - "--bind_ip"
+          - "0.0.0.0"
+          - "--replSet"
+          - "MainRepSet"
+        ports:
+        - containerPort: 27017
+        volumeMounts:
+        - name: mongodb-volume
+          mountPath: "/data/db"
+  volumeClaimTemplates:
+  - metadata:
+      name: mongodb-volume
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-service
+  namespace: testing-env
+spec:
+  clusterIP: None
+  selector:
+    app: mongodb
+  ports:
+  - port: 80
+    targetPort: 27017

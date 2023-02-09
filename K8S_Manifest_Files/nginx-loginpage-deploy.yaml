@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-loginpage-deployment
+  namespace: testing-env
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx-loginpage
+  template:
+    metadata:
+      labels:
+        app: nginx-loginpage
+    spec:
+      containers:
+      - name: nginx-loginpage-container
+        image: gmk1995/nginx-loginpage:v1
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "1"
+          limits:
+            memory: "2Gi"
+            cpu: "1.5"
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-loginpage-service
+spec:
+  type: ClusterIP
+  selector:
+    app: nginx-loginpage
+  ports:
+  - port: 80
+    targetPort: 80
+

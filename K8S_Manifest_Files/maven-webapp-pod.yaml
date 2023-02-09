@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: maven-webapp-pod
+  labels:
+    app: maven-webapp
+  namespace: testing-env
+spec:
+  containers:
+    - name: maven-webapp-container
+      image: gmk1995/my-maven-web-application:v1
+      ports:
+        - containerPort: 8080
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: maven-webapp-service
+  namespace: testing-env
+spec:
+  type: ClusterIP 
+  selector:
+    app: maven-webapp
+  ports:
+    - port: 80
+      targetPort: 8080
+

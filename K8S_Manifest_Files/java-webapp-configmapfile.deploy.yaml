@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: java-webapp-deployment
+  namespace: testing-env
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: javawebapp
+  template:
+    metadata:
+      labels:
+        app: javawebapp
+    spec:
+      containers:
+      - name: javawebapp-container
+        image: dockerhandson/java-web-app:latest
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "500m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+          - name: javawebapp-volume
+            path: /usr/local/tomcat/webapps/
+          - name: javawebapp-configmap-file-volume
+            path: /usr/local/tomcat/webapps/tomcat-users.xml
+            subPath: "tomcat-users.xml"
+      volumes:
+        - name: javawebapp-volume
+          persistentVolumeClaim:
+            claimName: javawebapppvc
+        - name: javawebapp-configmap-file-volume
+          configMap:
+            name: javawebapp-configfile
+            items:
+              - key: "tomcat-users.xml"
+                path: "tomcat-users.xml"
+
+---
+#Service Creation
+apiVersion: v1
+kind: Service
+metadata:
+  name: java-webapp-service
+  namespace: testing-env
+spec:
+  selector:
+    app: javawebapp
+  ports:
+  - port: 80
+    targetPort: 8080
+---
+#PVC Creation
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: javawebapppvc
+spec:
+  resources:
+    requests:
+      storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+

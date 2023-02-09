@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: jenkinsapp-ingress
+  labels:
+    name: jenkinsapp
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: jenkins.gmk.devopspractices.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: jenkins-service
+            port: 
+              number: 80

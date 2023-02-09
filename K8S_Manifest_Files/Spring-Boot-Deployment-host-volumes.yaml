@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-boot-mongo-deployment
+  namespace: testing-env
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: springboot-mongo
+  template:
+    metadata:
+      labels:
+        app: springboot-mongo
+    spec:
+      containers:
+      - name: springboot-mongo-container
+        image: gmk1995/my-spring-boot-app:v1
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8080
+        env:
+          - name: MONGO_DB_HOSTNAME
+            value: mongodb-service
+          - name: MONGO_DB_USERNAME
+            value: devdb
+          - name: MONGO_DB_PASSWORD
+            value: devdb@123
+
+---
+#SpringBoot Service
+apiVersion: v1
+kind: Service
+metadata: 
+ name: springboot-service
+ namespace: testing-env
+spec:
+  type: NodePort
+  selector:
+    app: springboot-mongo
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+#Mongodb Replica Set
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: mongodb
+  namespace: testing-env
+spec:
+  selector:
+     matchLabels:
+      app: mongo
+  template:
+    metadata:
+      name: mongodb-pod
+      labels:
+        app: mongo
+    spec:
+      containers:
+        - name: monogodb-container
+          image: mongo
+          ports:
+            - containerPort: 27017
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              value: devdb
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              value: devdb@123
+          volumeMounts:
+            - name: mongodb-volume
+              mountPath: /data/db
+      volumes:
+        - name: mongodb-volume
+          hostPath:
+            path: /mongodb
+---
+#Service Creation for MongoDB
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-service
+spec:
+  selector:
+    app: mongo
+  ports:
+  - port: 27017
+    targetPort: 27017
+    

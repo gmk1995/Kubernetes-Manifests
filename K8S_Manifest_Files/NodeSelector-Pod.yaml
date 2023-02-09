@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: wordpresspod
+  namespace: testing-env
+  labels:
+    app: wordpress
+spec:
+  nodeSelector:
+    name: k8s-worker1
+  containers:
+    - name: wordpress-container
+      image: wordpress
+      ports:
+        - containerPort: 80

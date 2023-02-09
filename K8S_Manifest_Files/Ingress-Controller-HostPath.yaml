@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-loginpage-myingress
+  labels:
+    name: nginx-loginpage
+  namespace: testing-env
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: gmk.devopspractices.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name:  nginx-loginpage-service
+            port: 
+              number: 80
+
